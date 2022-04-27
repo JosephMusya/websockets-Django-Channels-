@@ -1,5 +1,5 @@
 import requests
-
+from time import sleep
 # LOGIN_TOKEN = 'be590b7a4c26e54091d6d83ee6b85e157b058000'
 # AUTH = {
 #         'Authorization': 'Token {}'.format(LOGIN_TOKEN)
@@ -17,6 +17,8 @@ try:
                                         'integer':i,
                                         })
         print("Sending...")
+        #sleep(0.8)
+        
     # print(new_response.json()['integer'])
 
 except Exception as e:

@@ -5,7 +5,7 @@ class ValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Values
         fields = [
-            'integer',
+            'baggage_status',
         ]
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
