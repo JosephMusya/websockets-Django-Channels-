@@ -12,6 +12,7 @@ from djangochannelsrestframework.observer import model_observer
 from djangochannelsrestframework.decorators import action
 from djangochannelsrestframework.mixins import ListModelMixin
 
+from django.contrib.auth.models import User
 #from asgiref.sync import async_to_sync
 
 class MySocket(GenericAsyncAPIConsumer,
@@ -33,22 +34,33 @@ class MySocket(GenericAsyncAPIConsumer,
                        instance: Values, action, **kwargs) -> ValueSerializer:
         return ValueSerializer(instance)
     
+
+    #filtered observer response
+    @value_activity.groups_for_signal
+    def value_activity(self, instance: Values, **kwargs):
+        yield instance.user_id
+    
+    @value_activity.groups_for_consumer
+    def comment_activity(self, user, **kwargs):
+        yield user
+    
     #Action to be passed from json
     @action() 
     async def subscribe_to_value(self,
+                                 user_pk,
                                  request_id, **kwargs):
+        #user = await database_sync_to_async(User.objects.get)(pk=user_pk)
+        #print("{} subscribed to event changes".format(user))
         await self.value_activity.subscribe(
-            request_id = request_id
+            user = user_pk
         )
      
     async def connect(self):
-        print("USER",self.scope['user'])
-
-        self.room_group_name = 'test'
-        await (self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name #Auto generated
-        )
+        # self.room_group_name = 'test'
+        # await (self.channel_layer.group_add)(
+        #     self.room_group_name,
+        #     self.channel_name #Auto generated
+        # )
 
         await self.accept()
         
