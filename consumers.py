@@ -49,12 +49,21 @@ class MySocket(GenericAsyncAPIConsumer,
     async def subscribe_to_value(self,
                                  user_pk,
                                  request_id, **kwargs):
-        #user = await database_sync_to_async(User.objects.get)(pk=user_pk)
-        #print("{} subscribed to event changes".format(user))
+        user = await database_sync_to_async(User.objects.get)(pk=user_pk)
+        # status = await database_sync_to_async(Values.objects.get)(pk=user.id)
+        print("{} subscribed to event changes".format(user))
+        # print("{} is the current status".format(status))
         await self.value_activity.subscribe(
-            user = user_pk
+            user = user_pk,
+            # status = status
         )
-     
+        status = await self.get_status(user)
+        await self.send_json(
+            {
+                'baggage_status':status
+            }
+        )
+        
     async def connect(self):
         # self.room_group_name = 'test'
         # await (self.channel_layer.group_add)(
@@ -64,10 +73,10 @@ class MySocket(GenericAsyncAPIConsumer,
 
         await self.accept()
         
-        await self.send(text_data=json.dumps({
-            'type':'connection-response',
-            'message':'connection accepted from host',
-        }))
+        # await self.send(text_data=json.dumps({
+        #     'type':'connection-response',
+        #     'message':'connection accepted from host',
+        # }))
         
         
     # async def receive(self,text_data):      
@@ -80,9 +89,6 @@ class MySocket(GenericAsyncAPIConsumer,
     #         }
     #     )
     
-    async def disconnect(self, code):
-        await self.channel_layer.group_discard(self.room_group_name,self.channel_name)
-
     # async def broadcast_message(self,event):
     #     message = event['message']
         
@@ -91,7 +97,14 @@ class MySocket(GenericAsyncAPIConsumer,
     #         'message':message
     #     }))
     
-    # @database_sync_to_async
-    # def get_val(self):
-    #     model = Values()
-    #     serializer_class = ValueSerializer
+    
+    @database_sync_to_async
+    def get_status(self,user):
+        q_set = Values.objects.filter(user=user)
+        status = (q_set.values('baggage_status').first()['baggage_status'])
+        return status
+        
+        # status = await database_sync_to_async(value.baggage_status)
+
+        
+        
