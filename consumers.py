@@ -7,7 +7,7 @@ from channels.db import database_sync_to_async
 from .models import Values
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework.observer.generics import ObserverModelInstanceMixin
-from .serializers import ValueSerializer,UserSerializer
+from .serializers import ValueSerializer
 from djangochannelsrestframework.observer import model_observer
 from djangochannelsrestframework.decorators import action
 from djangochannelsrestframework.mixins import ListModelMixin
@@ -40,25 +40,22 @@ class MySocket(GenericAsyncAPIConsumer,
         await self.value_activity.subscribe(
             request_id = request_id
         )
-    
-    # async def retrieve():
-    #     return ValueSerializer
-    # async def connect(self):
-    #     print("USER",self.scope['user'])
+     
+    async def connect(self):
+        print("USER",self.scope['user'])
 
-        # self.room_group_name = 'test'
-        # await (self.channel_layer.group_add)(
-        #     self.room_group_name,
-        #     self.channel_name #Auto generated
-        # )
+        self.room_group_name = 'test'
+        await (self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name #Auto generated
+        )
 
-        # await self.accept()
+        await self.accept()
         
-
-        # await self.send(text_data=json.dumps({
-        #     'type':'connection-response',
-        #     'message':'connection accepted from host',
-        # }))
+        await self.send(text_data=json.dumps({
+            'type':'connection-response',
+            'message':'connection accepted from host',
+        }))
         
         
     # async def receive(self,text_data):      
@@ -71,8 +68,8 @@ class MySocket(GenericAsyncAPIConsumer,
     #         }
     #     )
     
-    # async def disconnect(self, code):
-    #     await self.channel_layer.group_discard(self.room_group_name,self.channel_name)
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard(self.room_group_name,self.channel_name)
 
     # async def broadcast_message(self,event):
     #     message = event['message']
