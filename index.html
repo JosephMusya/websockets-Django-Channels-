@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wsock</title>
+
+</head>
+
+<body>
+    <h1>BTIS</h1>
+    <div>
+
+        <form method="POST" name="info" onsubmit="trackInfo()">
+            {%csrf_token%}
+            <label for="">Enter Baggage Info (Ticket Number)</label>
+            <input name="baggage-info" type="text">
+            <button action="submit">Submit</button>
+        </form>
+        <h4>
+            <span id='myStatus' style="color: blue;">Baggage Status </span>
+        </h4>
+    </div>
+
+    <script>
+        function trackInfo(e) {
+            e.preventDefault()
+            filter_number = document.forms['info']['baggage-info']
+            console.log(filter_number)
+        }
+        var mainContainer = document.getElementById('myStatus')
+
+        var url = 'ws://localhost:8000/ws/'
+
+        const socket = new WebSocket(url)
+        mainContainer.innerHTML = 'Not Tracked'
+
+        socket.onmessage = function(e) {
+            e.preventDefault()
+            let data = JSON.parse(e.data)
+            console.log(data)
+            mainContainer.innerHTML = data.baggage_status
+                //div.innerHTML = "Heloo, this is Joe"
+        }
+
+        socket.onopen = function(e) {
+            console.log("Connection Established...")
+        }
+
+
+        socket.onclose = function(e) {
+            console.error("Connection closed!")
+        }
+    </script>
+</body>
+
+</html>
